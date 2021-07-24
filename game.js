@@ -10,9 +10,8 @@ kaboom({
 
 const MOVE_SPEED = 120;
 const JUMP_FORCE = 400;
-const BIG_JUMP_FORCE = 450;
-let CURRENT_JUMP_FORCE = JUMP_FORCE;
 let isJumping = true;
+let CURRENT_JUMP_FORCE = JUMP_FORCE;
 const FALL_DEATH = 400;
 
 loadRoot('https://i.imgur.com/');
@@ -22,7 +21,9 @@ loadSprite('coin', 'wbKxhcd.png');
 loadSprite('evil-shroom', 'KPO3fR9.png');
 loadSprite('brick', 'pogC9x5.png');
 loadSprite('block', 'M6rwarW.png');
-loadSprite('mario', 'Wb1qfhK.png'); // small
+loadSprite('mario', 'Wb1qfhK.png'); // Mario standing small
+loadSprite('marioRight', '2r2Agzs.png');//  Mario right
+loadSprite('marioLeft', 'vujGU6O.png'); //  Mario left
 loadSprite('mushroom', '0wMd92p.png');
 loadSprite('surprise', 'gesQ1KP.png');
 loadSprite('unboxed', 'bdrLpi6.png');
@@ -51,7 +52,7 @@ scene('game', ({level, score}) => {
       '     %    =*=%=                                  -+                ',
       '                                                 ()                ',
       '                            -+        -+         ()                   ',
-      '                    ^   ^   ()   ^    ()         ()                   ',
+      '                    ^   ^   ()   ^    ()         ()                    ',
       '================================================================   ===========',
       '================================================================   ===========',
     ],
@@ -106,32 +107,11 @@ scene('game', ({level, score}) => {
 
   add([text('level ' + parseInt(level + 1)), pos(40, 6)]);
 
-  /**
- *@return {boolean}
- */
-  function big() {
-    return {
-      smallify() {
-        this.scale = vec2(1);
-        CURRENT_JUMP_FORCE = JUMP_FORCE;
-        return isBig = false;
-      },
-      biggify() {
-        CURRENT_JUMP_FORCE = BIG_JUMP_FORCE;
-        // player.changeSprite('evil-shroom')
-        this.scale = vec2(1.1);
-        return isBig = true;
-      },
-    };
-  }
-
-
   const player = add([
     sprite('mario'), solid(),
     pos(30, 0),
     scale(0.8),
     body(),
-    big(),
     origin('bot'),
   ]);
 
@@ -139,39 +119,19 @@ scene('game', ({level, score}) => {
     player.resolve();
   });
 
-  action('mushroom', (m) => {
-    m.move(20, 0);
-  });
-
-  player.on('headbump', (obj) => {
-    if (obj.is('coin-surprise')) {
-      gameLevel.spawn('$', obj.gridPos.sub(0, 1));
-      destroy(obj);
-      gameLevel.spawn('}', obj.gridPos.sub(0, 0));
-    }
-    if (obj.is('mushroom-surprise')) {
-      gameLevel.spawn('#', obj.gridPos.sub(0, 1));
-      destroy(obj);
-      gameLevel.spawn('}', obj.gridPos.sub(0, 0));
-    }
-  });
-
-  player.collides('mushroom', (m) => {
-    destroy(m);
-    player.biggify();
-  });
-
-  player.collides('coin', (c) => {
-    destroy(c);
-    scoreLabel.value++;
-    scoreLabel.text = scoreLabel.value;
-  });
-
   const ENEMY_SPEED = 20;
 
-  action('dangerous', (d) => {
+  action('dangerous', (d) => {//  emeny movement
     d.move(d.dir * ENEMY_SPEED, 0);
     body();
+  });
+
+  player.collides('dangerous', (d) => {
+    if (isJumping) {
+      destroy(d);
+    } else {
+      go('lose', {score: scoreLabel.value});
+    }
   });
 
   collides('dangerous', 'pipe-right', (d) => {
@@ -180,20 +140,6 @@ scene('game', ({level, score}) => {
 
   collides('dangerous', 'pipe-left', (d) => {
     d.dir = -d.dir;
-  });
-
-  let isBig = false;
-  player.collides('dangerous', (d) => {
-    if (isJumping) {
-      destroy(d);
-    } else if (isBig) {
-      camShake(1);
-      wait(0.1, () => {
-        player.smallify();
-      });
-    } else {
-      go('lose', {score: scoreLabel.value});
-    }
   });
 
   player.action(() => {
@@ -213,11 +159,17 @@ scene('game', ({level, score}) => {
   });
 
   keyDown('left', () => {
+    player.changeSprite('marioLeft');
     player.move(-MOVE_SPEED, 0);
+    body();
+    origin('bot');
   });
 
   keyDown('right', () => {
+    player.changeSprite('marioRight');
     player.move(MOVE_SPEED, 0);
+    body();
+    origin('bot');
   });
 
   player.action(() => {
