@@ -11,7 +11,7 @@ kaboom({
 const MOVE_SPEED = 120;
 const JUMP_FORCE = 400;
 let isJumping = true;
-let CURRENT_JUMP_FORCE = JUMP_FORCE;
+const CURRENT_JUMP_FORCE = JUMP_FORCE;
 const FALL_DEATH = 400;
 
 loadRoot('https://i.imgur.com/');
