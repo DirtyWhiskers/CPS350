@@ -1,4 +1,5 @@
 /* eslint-disable linebreak-style */
+/* https://www.freecodecamp.org/news/how-to-build-mario-zelda-and-space-invaders-with-kaboom-js/ Date: 14Jul21 */
 
 kaboom({
   global: true,
@@ -18,12 +19,13 @@ loadRoot('https://i.imgur.com/');
 loadSprite('cloud', 'r33O1Ho.png');
 loadSprite('doubleCloud', 'YKUfqgu.png');
 loadSprite('coin', 'wbKxhcd.png');
-loadSprite('evil-shroom', 'KPO3fR9.png');
+loadSprite('evilShroom', 'KPO3fR9.png');
 loadSprite('brick', 'pogC9x5.png');
 loadSprite('block', 'M6rwarW.png');
 loadSprite('mario', 'Wb1qfhK.png'); // Mario standing small
 loadSprite('marioRight', '2r2Agzs.png');//  Mario right
 loadSprite('marioLeft', 'vujGU6O.png'); //  Mario left
+loadSprite('marioMiddle', 'kZTgkcC.png');
 loadSprite('mushroom', '0wMd92p.png');
 loadSprite('surprise', 'gesQ1KP.png');
 loadSprite('unboxed', 'bdrLpi6.png');
@@ -84,7 +86,7 @@ scene('game', ({ level, score }) => {
     ')': [sprite('pipeBottomRight'), solid(), scale(0.5), 'pipeRight'],
     '-': [sprite('pipeTopLeft'), solid(), scale(0.5), 'pipe'],
     '+': [sprite('pipeTopRight'), solid(), scale(0.5), 'pipe'],
-    '^': [sprite('evil-shroom'), { dir: -1 }, 'dangerous'],
+    '^': [sprite('evilShroom'), { dir: -1 }, 'dangerous'],
     '#': [sprite('mushroom'), solid(), 'mushroom', body()],
     '!': [sprite('blueBlock'), solid(), scale(0.5)],
     '£': [sprite('blueBrick'), solid(), scale(0.5)],
@@ -139,6 +141,16 @@ scene('game', ({ level, score }) => {
   player.action(() => {
     player.resolve();
   });
+
+  //  Mushroom function here.................
+
+  //  Coin function here....................
+
+  //  Headbump functio here....................
+
+  //  Collides coin here.....................
+
+  //  Collides mushroom.....................
 
   const ENEMY_SPEED = 20;
 
