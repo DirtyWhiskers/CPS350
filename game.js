@@ -44,7 +44,7 @@ loadSprite('blueSurprise', 'RMqCc1G.png');
 scene('game', ({ level, score }) => {
   layers(['bg', 'obj', 'ui'], 'obj');
 
-  const maps = [
+  const maps = [ // First and Second level
     [
       '                      c                                                                                                                            ',
       '                                          d                            c                                                                           ',
