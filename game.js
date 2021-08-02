@@ -118,11 +118,11 @@ scene('game', ({ level, score }) => {
     return {
       shrink() { // Character shrink
         this.scale = vec2(1);
-        CURRENT_JUMP = JUMPFORCE;
+        //CURRENT_JUMP = JUMPFORCE;
         return isBig = false;
       },
       growBig() { // Character grow
-        CURRENT_JUMP = BIG_JUMP_FORCE;
+        //CURRENT_JUMP = BIG_JUMP_FORCE;
         // player.changeSprite('evil-shroom')
         this.scale = vec2(1.1);
         return isBig = true;
@@ -135,6 +135,7 @@ scene('game', ({ level, score }) => {
     pos(30, 0),
     scale(0.8),
     body(),
+    drinkMePotion(),
     origin('bot'),
   ]);
 
@@ -147,6 +148,30 @@ scene('game', ({ level, score }) => {
   //  Coin function here....................
 
   //  Headbump functio here....................
+
+  player.on("headbump", (obj) => {
+    if (obj.is('coin-surprise')) {
+      gameLevel.spawn('$', obj.gridPos.sub(0, 1))
+      destroy(obj)
+      gameLevel.spawn('}', obj.gridPos.sub(0,0))
+    }
+    if (obj.is('mushroom-surprise')) {
+      gameLevel.spawn('#', obj.gridPos.sub(0, 1))
+      destroy(obj)
+      gameLevel.spawn('}', obj.gridPos.sub(0,0))
+    }
+  })
+
+  player.collides('mushroom', (m) => {
+    destroy(m)
+    player.growBig()
+  })
+
+  player.collides('coin', (c) => {
+    destroy(c)
+    scoreLabel.value++
+    scoreLabel.text = scoreLabel.value
+  })
 
   //  Collides coin here.....................
 
@@ -176,7 +201,7 @@ scene('game', ({ level, score }) => {
     } else if (isBig) { //  If character big shrink
       camShake(1);
       wait(0.1, () => {
-        player.smallify();
+        player.shrink();
       });
     } else { // If character is shrink kill
       go('lose', { score: scoreLabel.value });
