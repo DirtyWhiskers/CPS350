@@ -115,6 +115,7 @@ scene('game', ({level, score}) => {
  */
   function drinkMePotion() {
     return {
+<<<<<<< HEAD
       shrink() {
         this.scale = vec2(0.8);
         CURRENT_JUMP_FORCE = JUMP_FORCE;
@@ -122,6 +123,15 @@ scene('game', ({level, score}) => {
       },
       growBig() {
         CURRENT_JUMP_FORCE = BIG_JUMP_FORCE;
+=======
+      shrink() { // Character shrink
+        this.scale = vec2(1);
+        //CURRENT_JUMP = JUMPFORCE;
+        return isBig = false;
+      },
+      growBig() { // Character grow
+        //CURRENT_JUMP = BIG_JUMP_FORCE;
+>>>>>>> 58d012ccf288a9c1e10d5b15bf94c40146a2f635
         // player.changeSprite('evil-shroom')
         this.scale = vec2(1.1);
         return isBig = true;
@@ -159,10 +169,38 @@ scene('game', ({level, score}) => {
     }
   });
 
+<<<<<<< HEAD
   player.collides('mushroom', (m) => { // mushroom collide
     destroy(m);
     player.growBig();
   });
+=======
+  player.on("headbump", (obj) => {
+    if (obj.is('coin-surprise')) {
+      gameLevel.spawn('$', obj.gridPos.sub(0, 1))
+      destroy(obj)
+      gameLevel.spawn('}', obj.gridPos.sub(0,0))
+    }
+    if (obj.is('mushroom-surprise')) {
+      gameLevel.spawn('#', obj.gridPos.sub(0, 1))
+      destroy(obj)
+      gameLevel.spawn('}', obj.gridPos.sub(0,0))
+    }
+  })
+
+  player.collides('mushroom', (m) => {
+    destroy(m)
+    player.growBig()
+  })
+
+  player.collides('coin', (c) => {
+    destroy(c)
+    scoreLabel.value++
+    scoreLabel.text = scoreLabel.value
+  })
+
+  //  Collides coin here.....................
+>>>>>>> 58d012ccf288a9c1e10d5b15bf94c40146a2f635
 
   player.collides('coin', (c) => { // coin collide
     destroy(c);
