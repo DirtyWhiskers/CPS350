@@ -1,5 +1,4 @@
 /* eslint-disable linebreak-style */
-/* https://www.freecodecamp.org/news/how-to-build-mario-zelda-and-space-invaders-with-kaboom-js/ Date: 14Jul21 */
 
 kaboom({
   global: true,
@@ -10,41 +9,41 @@ kaboom({
 });
 
 const MOVE_SPEED = 120;
-const JUMPHEIGHT = 400;
+const JUMP_FORCE = 400;
+const BIG_JUMP_FORCE = 450;
+let CURRENT_JUMP_FORCE = JUMP_FORCE;
 let isJumping = true;
-let CURRENT_JUMP = JUMPHEIGHT;
 const FALL_DEATH = 400;
 
 loadRoot('https://i.imgur.com/');
 loadSprite('cloud', 'r33O1Ho.png');
 loadSprite('doubleCloud', 'YKUfqgu.png');
 loadSprite('coin', 'wbKxhcd.png');
-loadSprite('evilShroom', 'KPO3fR9.png');
+loadSprite('evil-shroom', 'KPO3fR9.png');
 loadSprite('brick', 'pogC9x5.png');
 loadSprite('block', 'M6rwarW.png');
 loadSprite('mario', 'Wb1qfhK.png'); // Mario standing small
 loadSprite('marioRight', '2r2Agzs.png');//  Mario right
 loadSprite('marioLeft', 'vujGU6O.png'); //  Mario left
-loadSprite('marioMiddle', 'kZTgkcC.png');
 loadSprite('mushroom', '0wMd92p.png');
 loadSprite('surprise', 'gesQ1KP.png');
 loadSprite('unboxed', 'bdrLpi6.png');
-loadSprite('pipeTopLeft', 'ReTPiWY.png'); // top left pipe
-loadSprite('pipeTopRight', 'hj2GK4n.png'); // top right pipe
-loadSprite('pipeBottomLeft', 'c1cYSbt.png'); // bottom left pipe
-loadSprite('pipeBottomRight', 'nqQ79eI.png'); // bottom right pipe
+loadSprite('pipe-top-left', 'ReTPiWY.png');
+loadSprite('pipe-top-right', 'hj2GK4n.png');
+loadSprite('pipe-bottom-left', 'c1cYSbt.png');
+loadSprite('pipe-bottom-right', 'nqQ79eI.png');
 
-loadSprite('blueBlock', 'fVscIbn.png');
-loadSprite('blueBrick', '3e5YRQd.png');
-loadSprite('blueSteel', 'gqVoI2b.png');
-loadSprite('blueEvilShroom', 'SvV4ueD.png');
-loadSprite('blueSurprise', 'RMqCc1G.png');
+loadSprite('blue-block', 'fVscIbn.png');
+loadSprite('blue-brick', '3e5YRQd.png');
+loadSprite('blue-steel', 'gqVoI2b.png');
+loadSprite('blue-evil-shroom', 'SvV4ueD.png');
+loadSprite('blue-surprise', 'RMqCc1G.png');
 
 
-scene('game', ({ level, score }) => {
+scene('game', ({level, score}) => {
   layers(['bg', 'obj', 'ui'], 'obj');
 
-  const maps = [ // First and Second level
+  const maps = [
     [
       '                      c                                                                                                                            ',
       '                                          d                            c                                                                           ',
@@ -82,17 +81,17 @@ scene('game', ({ level, score }) => {
     '%': [sprite('surprise'), solid(), 'coin-surprise'],
     '*': [sprite('surprise'), solid(), 'mushroom-surprise'],
     '}': [sprite('unboxed'), solid()],
-    '(': [sprite('pipeBottomLeft'), solid(), scale(0.5), 'pipeLeft'],
-    ')': [sprite('pipeBottomRight'), solid(), scale(0.5), 'pipeRight'],
-    '-': [sprite('pipeTopLeft'), solid(), scale(0.5), 'pipe'],
-    '+': [sprite('pipeTopRight'), solid(), scale(0.5), 'pipe'],
-    '^': [sprite('evilShroom'), { dir: -1 }, 'dangerous'],
+    '(': [sprite('pipe-bottom-left'), solid(), scale(0.5), 'pipe-left'],
+    ')': [sprite('pipe-bottom-right'), solid(), scale(0.5), 'pipe-right'],
+    '-': [sprite('pipe-top-left'), solid(), scale(0.5), 'pipe'],
+    '+': [sprite('pipe-top-right'), solid(), scale(0.5), 'pipe'],
+    '^': [sprite('evil-shroom'), { dir: -1 }, 'dangerous'],
     '#': [sprite('mushroom'), solid(), 'mushroom', body()],
-    '!': [sprite('blueBlock'), solid(), scale(0.5)],
-    '£': [sprite('blueBrick'), solid(), scale(0.5)],
-    'z': [sprite('blueEvilShroom'), solid(), scale(0.5), 'dangerous'],
-    '@': [sprite('blueSurprise'), solid(), scale(0.5), 'coinSurprise'],
-    'x': [sprite('blueSteel'), solid(), scale(0.5)],
+    '!': [sprite('blue-block'), solid(), scale(0.5)],
+    '£': [sprite('blue-brick'), solid(), scale(0.5)],
+    'z': [sprite('blue-evil-shroom'), solid(), scale(0.5), 'dangerous'],
+    '@': [sprite('blue-surprise'), solid(), scale(0.5), 'coin-surprise'],
+    'x': [sprite('blue-steel'), solid(), scale(0.5)],
     'c': [sprite('cloud'), scale(0.08)],
     'd': [sprite('doubleCloud'), scale(0.1)],
 
@@ -112,17 +111,17 @@ scene('game', ({ level, score }) => {
   add([text('level ' + parseInt(level + 1)), pos(40, 6)]);
 
   /**
-*@return {boolean}
-*/
-  function drinkMePotion() { // Character grow or shrink
+ *@return {boolean}
+ */
+  function drinkMePotion() {
     return {
-      shrink() { // Character shrink
-        this.scale = vec2(1);
-        CURRENT_JUMP = JUMPFORCE;
+      shrink() {
+        this.scale = vec2(0.8);
+        CURRENT_JUMP_FORCE = JUMP_FORCE;
         return isBig = false;
       },
-      growBig() { // Character grow
-        CURRENT_JUMP = BIG_JUMP_FORCE;
+      growBig() {
+        CURRENT_JUMP_FORCE = BIG_JUMP_FORCE;
         // player.changeSprite('evil-shroom')
         this.scale = vec2(1.1);
         return isBig = true;
@@ -135,6 +134,7 @@ scene('game', ({ level, score }) => {
     pos(30, 0),
     scale(0.8),
     body(),
+    drinkMePotion(),
     origin('bot'),
   ]);
 
@@ -142,51 +142,69 @@ scene('game', ({ level, score }) => {
     player.resolve();
   });
 
-  //  Mushroom function here.................
+  action('mushroom', (m) => {
+    m.move(20, 0);
+  });
 
-  //  Coin function here....................
+  player.on('headbump', (obj) => {
+    if (obj.is('coin-surprise')) { // coin appear after hitting block
+      gameLevel.spawn('$', obj.gridPos.sub(0, 1));
+      destroy(obj);
+      gameLevel.spawn('}', obj.gridPos.sub(0, 0));
+    }
+    if (obj.is('mushroom-surprise')) { // mushroom appear after hitting block
+      gameLevel.spawn('#', obj.gridPos.sub(0, 1));
+      destroy(obj);
+      gameLevel.spawn('}', obj.gridPos.sub(0, 0));
+    }
+  });
 
-  //  Headbump functio here....................
+  player.collides('mushroom', (m) => { // mushroom collide
+    destroy(m);
+    player.growBig();
+  });
 
-  //  Collides coin here.....................
-
-  //  Collides mushroom.....................
+  player.collides('coin', (c) => { // coin collide
+    destroy(c);
+    scoreLabel.value++;
+    scoreLabel.text = scoreLabel.value;
+  });
 
   const ENEMY_SPEED = 20;
 
-  action('dangerous', (d) => {//  emeny movement
+  action('dangerous', (d) => { // mashroom movement
     d.move(d.dir * ENEMY_SPEED, 0);
     body();
   });
 
-  collides('dangerous', 'pipeRight', (d) => { //  Bournces between pipes
+  collides('dangerous', 'pipe-right', (d) => { // mashroom bounces between pipe
     d.dir = -d.dir;
   });
 
-  collides('dangerous', 'pipeLeft', (d) => { // Bounces between pipes
+  collides('dangerous', 'pipe-left', (d) => { // mashroom bounces between pipe
     d.dir = -d.dir;
   });
 
-  // FireBall function here.......................
+  //  Fireball function here
 
   let isBig = false;
   player.collides('dangerous', (d) => {
     if (isJumping) {
       destroy(d);
-    } else if (isBig) { //  If character big shrink
+    } else if (isBig) {
       camShake(1);
       wait(0.1, () => {
-        player.smallify();
+        player.shrink();
       });
-    } else { // If character is shrink kill
-      go('lose', { score: scoreLabel.value });
+    } else {
+      go('lose', {score: scoreLabel.value});
     }
   });
 
   player.action(() => {
     camPos(player.pos);
     if (player.pos.y >= FALL_DEATH) {
-      go('lose', { score: scoreLabel.value });
+      go('lose', {score: scoreLabel.value});
     }
   });
 
@@ -222,7 +240,7 @@ scene('game', ({ level, score }) => {
   keyPress('space', () => {
     if (player.grounded()) {
       isJumping = true;
-      player.jump(CURRENT_JUMP);
+      player.jump(CURRENT_JUMP_FORCE);
     }
   });
 });
