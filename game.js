@@ -25,6 +25,11 @@ loadSprite('block', 'M6rwarW.png');
 loadSprite('mario', 'Wb1qfhK.png'); // Mario standing small
 loadSprite('marioRight', '2r2Agzs.png');//  Mario right
 loadSprite('marioLeft', 'vujGU6O.png'); //  Mario left
+loadSprite('marioMedium', 'kZTgkcC.png');// Mario medium
+loadSprite('marioMediumLeft', '60tt3zQ.png');// Mario medium left
+loadSprite('marioSuperRight', 'QDCgHkb.png'); // Mario super right
+loadSprite('marioSuperLeft', 'QrVQJFp.png'); // Mario super left
+loadSprite('endFlag', '7R5zHud.png'); // End flag
 loadSprite('mushroom', '0wMd92p.png');
 loadSprite('surprise', 'gesQ1KP.png');
 loadSprite('unboxed', 'bdrLpi6.png');
@@ -49,9 +54,9 @@ scene('game', ({level, score}) => {
       '                                          d                            c                                                                           ',
       '         c                       d c                         c                                                                                     ',
       '                         %                                                         ========     ==%               *            ===    =%%=         ',
-      '                                                                                                                                                   ',
-      '                                                                                                                                                   ',
-      '                  %    =*=%=                                                =*=                   =      ==    %  %  %     =           ==          ',
+      '                                                                                                                                    f              ',
+      '                                                                                                                                                    ',
+      '       =*            %    =*=*=                                                =*=                   =      ==    %  %  %     =         ==          ',
       '                                                                                                                                                   ',
       '                                  -+       -+     -+        -+                                                                                     ',
       '                            ^     ()       () ^   ()   ^^   ()                                                                                     ',
@@ -85,7 +90,7 @@ scene('game', ({level, score}) => {
     ')': [sprite('pipe-bottom-right'), solid(), scale(0.5), 'pipe-right'],
     '-': [sprite('pipe-top-left'), solid(), scale(0.5), 'pipe'],
     '+': [sprite('pipe-top-right'), solid(), scale(0.5), 'pipe'],
-    '^': [sprite('evil-shroom'), { dir: -1 }, 'dangerous'],
+    '^': [sprite('evil-shroom'), {dir: -1}, 'dangerous'],
     '#': [sprite('mushroom'), solid(), 'mushroom', body()],
     '!': [sprite('blue-block'), solid(), scale(0.5)],
     '£': [sprite('blue-brick'), solid(), scale(0.5)],
@@ -94,6 +99,7 @@ scene('game', ({level, score}) => {
     'x': [sprite('blue-steel'), solid(), scale(0.5)],
     'c': [sprite('cloud'), scale(0.08)],
     'd': [sprite('doubleCloud'), scale(0.1)],
+    'f': [sprite('endFlag'), scale(0.1)],
 
   };
 
@@ -115,26 +121,26 @@ scene('game', ({level, score}) => {
  */
   function drinkMePotion() {
     return {
-<<<<<<< HEAD
       shrink() {
-        this.scale = vec2(0.8);
         CURRENT_JUMP_FORCE = JUMP_FORCE;
+        player.changeSprite('mario');
+        this.scale = vec2(1.0);
         return isBig = false;
+      },
+      shrinker() {
+        this.scale = vec2(1.0);
+        return isBig = true, isBigger = false;
       },
       growBig() {
         CURRENT_JUMP_FORCE = BIG_JUMP_FORCE;
-=======
-      shrink() { // Character shrink
-        this.scale = vec2(1);
-        //CURRENT_JUMP = JUMPFORCE;
-        return isBig = false;
-      },
-      growBig() { // Character grow
-        //CURRENT_JUMP = BIG_JUMP_FORCE;
->>>>>>> 58d012ccf288a9c1e10d5b15bf94c40146a2f635
-        // player.changeSprite('evil-shroom')
-        this.scale = vec2(1.1);
+        player.changeSprite('marioMedium');
+        this.scale = vec2(1.0);
         return isBig = true;
+      },
+      growBigger() {
+        player.changeSprite('marioSuperRight');
+        this.scale = vec2(1.0 );
+        return isBigger = true, isBig = false;
       },
     };
   }
@@ -169,38 +175,14 @@ scene('game', ({level, score}) => {
     }
   });
 
-<<<<<<< HEAD
   player.collides('mushroom', (m) => { // mushroom collide
     destroy(m);
-    player.growBig();
+    if (isBig) {
+      player.growBigger();
+    } else {
+      player.growBig();
+    }
   });
-=======
-  player.on("headbump", (obj) => {
-    if (obj.is('coin-surprise')) {
-      gameLevel.spawn('$', obj.gridPos.sub(0, 1))
-      destroy(obj)
-      gameLevel.spawn('}', obj.gridPos.sub(0,0))
-    }
-    if (obj.is('mushroom-surprise')) {
-      gameLevel.spawn('#', obj.gridPos.sub(0, 1))
-      destroy(obj)
-      gameLevel.spawn('}', obj.gridPos.sub(0,0))
-    }
-  })
-
-  player.collides('mushroom', (m) => {
-    destroy(m)
-    player.growBig()
-  })
-
-  player.collides('coin', (c) => {
-    destroy(c)
-    scoreLabel.value++
-    scoreLabel.text = scoreLabel.value
-  })
-
-  //  Collides coin here.....................
->>>>>>> 58d012ccf288a9c1e10d5b15bf94c40146a2f635
 
   player.collides('coin', (c) => { // coin collide
     destroy(c);
@@ -224,14 +206,21 @@ scene('game', ({level, score}) => {
   });
 
   //  Fireball function here
+  //  Create a fireball
 
   let isBig = false;
+  let isBigger = false;
   player.collides('dangerous', (d) => {
     if (isJumping) {
       destroy(d);
+    } else if (isBigger) {
+      camShake(1);
+      wait(0.2, () => {
+        player.shrinker();
+      });
     } else if (isBig) {
       camShake(1);
-      wait(0.1, () => {
+      wait(0.2, () => {
         player.shrink();
       });
     } else {
@@ -256,17 +245,41 @@ scene('game', ({level, score}) => {
   });
 
   keyDown('left', () => {
-    player.changeSprite('marioLeft');
-    player.move(-MOVE_SPEED, 0);
-    body();
-    origin('bot');
+    if (isBigger) {
+      player.changeSprite('marioSuperLeft');
+      player.move(-MOVE_SPEED, 0);
+      body();
+      origin('bot');
+    } else if (isBig) {
+      player.changeSprite('marioMediumLeft');
+      player.move(-MOVE_SPEED, 0);
+      body();
+      origin('bot');
+    } else {
+      player.changeSprite('marioLeft');
+      player.move(-MOVE_SPEED, 0);
+      body();
+      origin('bot');
+    }
   });
 
   keyDown('right', () => {
-    player.changeSprite('marioRight');
-    player.move(MOVE_SPEED, 0);
-    body();
-    origin('bot');
+    if (isBigger) {
+      player.changeSprite('marioSuperRight');
+      player.move(MOVE_SPEED, 0);
+      body();
+      origin('bot');
+    } else if (isBig) {
+      player.changeSprite('marioMedium');
+      player.move(MOVE_SPEED, 0);
+      body();
+      origin('bot');
+    } else {
+      player.changeSprite('marioRight');
+      player.move(MOVE_SPEED, 0);
+      body();
+      origin('bot');
+    }
   });
 
   player.action(() => {
@@ -283,8 +296,8 @@ scene('game', ({level, score}) => {
   });
 });
 
-scene('lose', ({ score }) => {
+scene('lose', ({score}) => {
   add([text(score, 32), origin('center'), pos(width() / 2, height() / 2)]);
 });
 
-start('game', { level: 0, score: 0 });
+start('game', {level: 0, score: 0});
