@@ -30,6 +30,8 @@ loadSprite('marioMediumLeft', '60tt3zQ.png');// Mario medium left
 loadSprite('marioSuperRight', 'QDCgHkb.png'); // Mario super right
 loadSprite('marioSuperLeft', 'QrVQJFp.png'); // Mario super left
 loadSprite('endFlag', '7R5zHud.png'); // End flag
+loadSprite('greenHill', 'g09tOqP.png'); // Green Hill
+
 loadSprite('mushroom', '0wMd92p.png');
 loadSprite('surprise', 'gesQ1KP.png');
 loadSprite('unboxed', 'bdrLpi6.png');
@@ -58,7 +60,7 @@ scene('game', ({level, score}) => {
       '                                                                                                                                                    ',
       '       =*            %    =*=*=                                                =*=                   =      ==    %  %  %     =         ==          ',
       '                                                                                                                                                   ',
-      '                                  -+       -+     -+        -+                                                                                     ',
+      '          g                       -+       -+     -+        -+                g                                                                    ',
       '                            ^     ()       () ^   ()   ^^   ()                                                                                     ',
       '=======================================================================  ==============      ===============================================       ',
       '=======================================================================  ==============      ===============================================       ',
@@ -100,6 +102,7 @@ scene('game', ({level, score}) => {
     'c': [sprite('cloud'), scale(0.08)],
     'd': [sprite('doubleCloud'), scale(0.1)],
     'f': [sprite('endFlag'), scale(0.1)],
+    'g': [sprite('greenHill'), scale(0.1)],
 
   };
 
