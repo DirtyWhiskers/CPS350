@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable linebreak-style */
 
 kaboom({
@@ -8,12 +9,18 @@ kaboom({
   clearColor: [0, 1, 1, 1],
 });
 
-const MOVE_SPEED = 120;
-const JUMP_FORCE = 400;
-const BIG_JUMP_FORCE = 450;
-let CURRENT_JUMP_FORCE = JUMP_FORCE;
-let isJumping = true;
-const FALL_DEATH = 400;
+MOVE_SPEED = 155;
+JUMP_FORCE = 435;
+BIG_JUMP_FORCE = 450;
+CURRENT_JUMP_FORCE = JUMP_FORCE;
+isJumping = true;
+FALL_DEATH = 400;
+directions = {
+  LEFT: 'left',
+  RIGHT: 'right',
+};
+
+const BULLET_SPEED = 480;
 
 loadRoot('https://i.imgur.com/');
 loadSprite('cloud', 'r33O1Ho.png');
@@ -22,6 +29,8 @@ loadSprite('coin', 'wbKxhcd.png');
 loadSprite('evil-shroom', 'KPO3fR9.png');
 loadSprite('brick', 'pogC9x5.png');
 loadSprite('block', 'M6rwarW.png');
+loadSprite('brown-brick', 'nYDwuug.png');
+loadSprite('brown-steel', 'AfZajME.png');
 loadSprite('mario', 'Wb1qfhK.png'); // Mario standing small
 loadSprite('marioRight', '2r2Agzs.png');//  Mario right
 loadSprite('marioLeft', 'vujGU6O.png'); //  Mario left
@@ -31,6 +40,7 @@ loadSprite('marioSuperRight', 'QDCgHkb.png'); // Mario super right
 loadSprite('marioSuperLeft', 'QrVQJFp.png'); // Mario super left
 loadSprite('endFlag', '7R5zHud.png'); // End flag
 loadSprite('greenHill', 'g09tOqP.png'); // Green Hill
+loadSprite('fireball', 'MkHqQl7.png'); // FireBall
 
 loadSprite('mushroom', '0wMd92p.png');
 loadSprite('surprise', 'gesQ1KP.png');
@@ -52,18 +62,18 @@ scene('game', ({level, score}) => {
 
   const maps = [
     [
-      '                      c                                                                                                                            ',
-      '                                          d                            c                                                                           ',
-      '         c                       d c                         c                                                                                     ',
-      '                         %                                                         ========     ==%               *            ===    =%%=         ',
-      '                                                                                                                                    f              ',
-      '                                                                                                                                                    ',
-      '       =*            %    =*=*=                                                =*=                   =      ==    %  %  %     =         ==          ',
-      '                                                                                                                                                   ',
-      '          g                       -+       -+     -+        -+                g                                                                    ',
-      '                            ^     ()       () ^   ()   ^^   ()                                                                                     ',
-      '=======================================================================  ==============      ===============================================       ',
-      '=======================================================================  ==============      ===============================================       ',
+      '                      c                                                                                                                                                                                                       ',
+      '                                          d                            c                                                                                                                                                              ',
+      '         c                       d c                         c                                                                                                                                      ~~                        ',
+      '                         %                                                         ________     __%               *            ___    _%%_                                                         ~~~                                 ',
+      '                                                                                                                                                                                                  ~~~~    f        ____                      ',
+      '                                                                                                                                                                                                 ~~~~~             ____                         ',
+      '                  %    _*_*_                                                _*_                   _      __    %  %  %     _          __        ~  ~          ~~  ~~            __%_            ~~~~~~             ____                  ',
+      '                                                                                                                                               ~~  ~~        ~~~  ~~~                          ~~~~~~~            __  __                  ',
+      '                                  -+       -+     -+        -+                                                                                ~~~  ~~~      ~~~~  ~~~~     -+              -+ ~~~~~~~~            __  __                       ',
+      '                            ^     ()       () ^   ()   ^^   ()                                                                               ~~~~  ~~~~    ~~~~~  ~~~~~    ()              ()~~~~~~~~~            __  __                           ',
+      '=======================================================================  ==============   ======================================================================  ====================================================                              ',
+      '=======================================================================  ==============   ======================================================================  ====================================================                                ',
     ],
     [
       '£    !!!!!!!    £',
@@ -74,9 +84,22 @@ scene('game', ({level, score}) => {
       '£    $$$$$$$    £',
       '£    £££££££    £',
       '£    £££££££  -+£',
-      '£    £££££££  ()£',
+      '£    £££££££  -+£',
       '!!!!!!!!!!!!!!!!!',
       '!!!!!!!!!!!!!!!!!',
+    ],
+    [
+      '£                                                     £            £',
+      '£                                                     £            £',
+      '£                                                     £            £',
+      '£                                                     £            £',
+      '£                                 £ ££££££ £          ££££         £',
+      '£    %%%%%%%%%%%%                 £$£    £$£             £         £',
+      '£                                 £££    £££             £         £',
+      '£                                                                  £',
+      '£                                                                  £',
+      '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',
+      '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',
     ],
   ];
 
@@ -101,8 +124,10 @@ scene('game', ({level, score}) => {
     'x': [sprite('blue-steel'), solid(), scale(0.5)],
     'c': [sprite('cloud'), scale(0.08)],
     'd': [sprite('doubleCloud'), scale(0.1)],
-    'f': [sprite('endFlag'), scale(0.1)],
+    'f': [sprite('endFlag'), solid(), scale(0.1), 'endFlag'],
     'g': [sprite('greenHill'), scale(0.1)],
+    '_': [sprite('brown-brick'), solid(), scale(0.622)],
+    '~': [sprite('brown-steel'), solid(), scale(0.622)],
 
   };
 
@@ -142,13 +167,46 @@ scene('game', ({level, score}) => {
       },
       growBigger() {
         player.changeSprite('marioSuperRight');
-        this.scale = vec2(1.0 );
+        this.scale = vec2(1.0);
         return isBigger = true, isBig = false;
       },
     };
   }
 
-  const player = add([
+  const currentDirection = directions.RIGHT;
+
+  // eslint-disable-next-line valid-jsdoc
+  /**
+ *@type{string}
+ */
+  function spawnBullet(bulletpos) {
+    if (currentDirection == directions.LEFT) {
+      bulletpos = bulletpos.sub(10 - 10);
+    } else if (currentDirection == directions.RIGHT) {
+      bulletpos = bulletpos.add(10, -10);
+    }
+    add([
+      sprite('fireball'),
+      scale(0.03), // Size of fireball
+      pos(bulletpos),
+      origin('center'),
+      color(1, 1, 1),
+      'bullet',
+      {
+        bulletSpeed: currentDirection ==
+        directions.LEFT ? -1 * BULLET_SPEED : BULLET_SPEED,
+      },
+    ]);
+  }
+
+  action('bullet', (b) => {
+    b.move(b.bulletSpeed, 0);
+    if ((b.pos.x < 0) || (b.pos.x > map)) {
+      destroy(b);
+    }
+  });
+
+  const player = add([ // Create player
     sprite('mario'), solid(),
     pos(30, 0),
     scale(0.8),
@@ -208,9 +266,6 @@ scene('game', ({level, score}) => {
     d.dir = -d.dir;
   });
 
-  //  Fireball function here
-  //  Create a fireball
-
   let isBig = false;
   let isBigger = false;
   player.collides('dangerous', (d) => {
@@ -243,8 +298,20 @@ scene('game', ({level, score}) => {
       go('game', {
         level: (level + 1) % maps.length,
         score: scoreLabel.value,
+        player,
       });
     });
+  });
+
+  player.collides('endFlag', () => {
+    keyPress('right', () => {
+      go('lose', {score: scoreLabel.value});
+    });
+  });
+
+  collides('dangerous', 'bullet', (dangerous, bullet) => {
+    destroy(dangerous);
+    destroy(bullet);
   });
 
   keyDown('left', () => {
@@ -292,6 +359,12 @@ scene('game', ({level, score}) => {
   });
 
   keyPress('space', () => {
+    if (isBigger) {
+      spawnBullet(player.pos);
+    }
+  });
+
+  keyPress('up', () => {
     if (player.grounded()) {
       isJumping = true;
       player.jump(CURRENT_JUMP_FORCE);
