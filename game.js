@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 /* eslint-disable linebreak-style */
+/* https://www.freecodecamp.org/news/how-to-build-mario-zelda-and-space-invaders-with-kaboom-js/ 05Jul21 */
 
 kaboom({
   global: true,
